@@ -6,7 +6,10 @@ import numpy as np
 import pandas as pd
 
 def forecast(train, test):
-    sp = 168  # 24 hours * 7 days
+    if len (train) < 2 * 24 * 7:
+        sp = len(train) // 2
+    else:
+        sp = 168  # 24 hours * 7 days
     
     forecaster = TransformedTargetForecaster(
         [

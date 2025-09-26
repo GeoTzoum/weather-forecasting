@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify
-from cities import cities
-from data_collect import fetch_weather_data, preprocess_data
-from model import forecast
+from src.cities import cities
+from src.data_collect import fetch_weather_data, preprocess_data
+from src.model import forecast
 import pandas as pd
 
 app = Flask(__name__)
@@ -17,11 +17,14 @@ def list_cities():
 @app.route("/forecast", methods=["GET"])
 def forecast_data():
     city = request.args.get("city", "Athens")          # default: Athens
-    steps = int(request.args.get("steps", 24))         # default: 24h
+    try:
+        steps = int(request.args.get("steps", 24))         # default: 24h
+    except ValueError:
+        return jsonify({"error": "Invalid steps parameter, must be an integer"}), 400
     
     if city not in cities:
         return jsonify({"error": "City not found"}), 400
-    
+        
     lat, lon = cities[city]
     df = fetch_weather_data(lat, lon)
     df = preprocess_data(df)
