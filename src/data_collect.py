@@ -1,4 +1,3 @@
-import os
 import pandas as pd
 import requests_cache
 from retry_requests import retry
