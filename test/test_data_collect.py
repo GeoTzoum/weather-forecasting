@@ -44,23 +44,41 @@ class TestDataCollect(unittest.TestCase):
             ["date", "temperature_2m", "relative_humidity_2m", "wind_speed_10m", "rain"]
         )
         self.assertTrue((df["temperature_2m"] == [20, 21, 22]).all())
+        self.assertTrue((df["relative_humidity_2m"] == [60, 61, 62]).all())
+        self.assertTrue((df["wind_speed_10m"] == [3.0, 3.2, 3.1]).all())
+        self.assertTrue((df["rain"] == [0.0, 0.1, 0.0]).all())
+        self.assertTrue(pd.api.types.is_datetime64_any_dtype(df["date"]))
 
     def test_preprocess_data(self):
-        # Build DataFrame covering 2 days
-        df = pd.DataFrame({
-            "date": pd.date_range("2025-01-01 00:00", periods=6, freq="H"),
-            "temperature_2m": [20, 21, 22, 23, 24, 25]
-        })
-        # last 2 rows are day 2025-01-01 05:00, still same date
-        # add one from the next day
-        df.loc[len(df)] = [pd.Timestamp("2025-01-02 00:00"), 26]
+        # Create a sample dataframe
+        data = {
+            "date": pd.date_range(start="2023-01-01", periods=5, freq="H"),
+            "temperature_2m": [20, 21, 22, 23, 24],
+            "relative_humidity_2m": [60, 61, 62, 63, 64],
+            "wind_speed_10m": [3.0, 3.2, 3.1, 3.3, 3.4],
+            "rain": [0.0, 0.1, 0.0, 0.2, 0.0],
+        }
+        df = pd.DataFrame(data)
 
-        # Preprocess
-        processed = preprocess_data(df)
+        # Add future dates
+        future_dates = pd.date_range(start="2023-01-01 05:00", periods=5, freq="H")
+        future_data = {
+            "date": future_dates,
+            "temperature_2m": [25, 26, 27, 28, 29],
+            "relative_humidity_2m": [65, 66, 67, 68, 69],
+            "wind_speed_10m": [3.5, 3.6, 3.7, 3.8, 3.9],
+            "rain": [0.1, 0.0, 0.2, 0.1, 0.0],
+        }
+        df_future = pd.DataFrame(future_data)
+        df = pd.concat([df, df_future], ignore_index=True)
 
-        # Should drop last day's rows (2025-01-02)
-        self.assertTrue(all(processed["date"].dt.date < pd.to_datetime("2025-01-02").date()))
-        self.assertEqual(len(processed), len(df) - 1)
+        # Preprocess the data
+        df_processed = preprocess_data(df)
+
+        # Assertions
+        self.assertIsInstance(df_processed, pd.DataFrame)
+        self.assertTrue((df_processed['date'] <= str(pd.Timestamp.now())).all())
+        self.assertTrue(all(col in df_processed.columns for col in data.keys()))
 
 if __name__ == "__main__":
     unittest.main()

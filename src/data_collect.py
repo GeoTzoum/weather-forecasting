@@ -3,6 +3,8 @@ import pandas as pd
 import requests_cache
 from retry_requests import retry
 import openmeteo_requests
+from datetime import datetime, timezone
+
 
 # ---------- Setup API Client ----------
 cache_session = requests_cache.CachedSession(".cache", expire_after=3600)
@@ -42,9 +44,10 @@ def fetch_weather_data(lat: float, lon: float, days: int = 60) -> pd.DataFrame:
 def preprocess_data(df: pd.DataFrame) -> pd.DataFrame:
     df['date'] = pd.to_datetime(df['date'])
 
-    # Find the last date (without time)
-    last_day = df['date'].dt.date.max()
+    # Get current UTC time
+    now = str(datetime.now())
 
-    # Filter out rows from the last day
-    df = df[df['date'].dt.date != last_day]
+    # Keep only rows up to "now"
+    df = df[df['date'] <= now]
+
     return df
