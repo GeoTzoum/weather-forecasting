@@ -4,7 +4,10 @@ from src.data_collect import fetch_weather_data, preprocess_data
 from src.model import forecast
 import pandas as pd
 
+from flask_cors import CORS
+
 app = Flask(__name__)
+CORS(app)
 
 @app.route("/", methods=["GET"])
 def home():
@@ -45,3 +48,6 @@ def forecast_data():
         "timestamps": timestamps.strftime("%Y-%m-%d %H:%M:%S").tolist(),
         "predictions": forecasts,
     })
+
+if __name__ == "__main__":
+    app.run(debug=True)

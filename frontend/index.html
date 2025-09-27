@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🌤 Weather Forecast Dashboard</title>
+  
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  
+  <style>
+    body {
+      background: linear-gradient(to right, #e3f2fd, #ffffff);
+      min-height: 100vh;
+    }
+    .card {
+      border-radius: 1rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .forecast-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container py-5">
+    <h1 class="text-center mb-4">🌍 Weather Forecast</h1>
+    
+    <!-- Input -->
+    <div class="row mb-3">
+      <div class="col-md-8 mx-auto">
+        <label for="city" class="form-label">Enter City:</label>
+        <input id="city" class="form-control" placeholder="Athens" />
+      </div>
+    </div>
+    
+    <div class="row mb-4">
+      <div class="col-md-8 mx-auto d-grid">
+        <button id="fetchBtn" class="btn btn-primary btn-lg">Get Forecast</button>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div id="results" class="forecast-grid"></div>
+  </div>
+
+  <!-- Bootstrap JS Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    async function fetchForecast() {
+      const city = document.getElementById("city").value || "Athens";
+      console.log("Fetching forecast for:", city);
+      const res = await fetch(`http://127.0.0.1:5000/forecast?city=${city}&steps=12`);
+      const data = await res.json();
+      console.log("API response:", data);
+
+      if (data.error) {
+        document.getElementById("results").innerHTML = 
+          `<div class="alert alert-danger">${data.error}</div>`;
+        return;
+      }
+
+      // Build forecast cards
+      const resultsDiv = document.getElementById("results");
+      resultsDiv.innerHTML = "";
+
+      data.timestamps.forEach((time, idx) => {
+        resultsDiv.innerHTML += `
+          <div class="card p-3">
+            <h5 class="card-title">${time}</h5>
+            <ul class="list-unstyled mb-0">
+              <li>🌡 Temp: ${data.predictions.temperature_2m[idx].toFixed(1)} °C</li>
+              <li>💧 Humidity: ${data.predictions.relative_humidity_2m[idx].toFixed(0)} %</li>
+              <li>🍃 Wind: ${data.predictions.wind_speed_10m[idx].toFixed(1)} m/s</li>
+              <li>☔ Rain: ${data.predictions.rain[idx].toFixed(2)} mm</li>
+            </ul>
+          </div>
+        `;
+      });
+    }
+
+    document.getElementById("fetchBtn").addEventListener("click", fetchForecast);
+  </script>
+</body>
+</html>
