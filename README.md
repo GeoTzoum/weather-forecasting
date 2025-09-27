@@ -59,4 +59,5 @@ The dashboard after choosing to make predictions for Athens will look like this:
 
 
 👨‍💻 Author
+
 Built with a lot of patience and learning step by step.
