@@ -20,6 +20,7 @@ Features:
 
 ### 🚀 How to Run the App
 1️⃣ Clone the Repository
+
 2️⃣ Set Up Python Environment
 
 It’s recommended to use a virtual environment.
